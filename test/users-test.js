@@ -24,7 +24,7 @@ test('POST /', async t => {
     body: {
       name: user.name,
       username: user.username,
-      passowrd: user.passowrd,
+      password: user.password,
       email: user.email
     },
     resolveWithFullResponse: true
@@ -33,10 +33,26 @@ test('POST /', async t => {
   let response = await request(options)
 
   delete user.email
-  delete user.passowrd
+  delete user.password
 
   t.is(response.statusCode, 201)
   t.deepEqual(response.body, user)
 })
 
-test.todo('GET /:username')
+test('GET /:username', async t => {
+  let user = fixtures.getUser()
+  let url = t.context.url
+
+  let options = {
+    method: 'GET',
+    uri: `${url}/${user.username}`,
+    json: true
+  }
+
+  let body = await request(options)
+
+  delete user.email
+  delete user.password
+
+  t.deepEqual(body, user)
+})

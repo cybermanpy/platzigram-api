@@ -27,7 +27,7 @@ export default {
   },
   getUser () {
     return {
-      id: 'faec762b-7c95-4537-84c8-a14fb8ac0638',
+      id: '8be6379d-2290-4991-a69a-103e7cd3799c',
       name: 'Freddy Vega',
       username: 'freddier',
       email: 'f@platzi.test',

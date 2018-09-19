@@ -4,6 +4,7 @@ import { send, json } from 'micro'
 import HttpHash from 'http-hash'
 import Db from 'platzigram-db'
 import config from './config'
+import utils from './lib/utils'
 import DbStub from './test/stub/db'
 
 const env = process.env.NODE_ENV || 'production'
@@ -15,27 +16,20 @@ if (env === 'test') {
 
 const hash = HttpHash()
 
-hash.set('POST /', async function saveUser (req, res, params) {
-  let user = await json(req)
+hash.set('POST /', async function authenticate (req, res, options) {
+  let credentials = await json(req)
   await db.connect()
-  let created = await db.saveUser(user)
-  await db.disconnect()
+  let auth = await db.authenticate(credentials.username, credentials.password)
 
-  delete created.email
-  delete created.password
+  if (!auth) {
+    return send(res, 401, { error: 'invalid credentials' })
+  }
 
-  send(res, 201, created)
-})
+  let token = await utils.signToken({
+    username: credentials.username
+  }, config.secret)
 
-hash.set('GET /:username', async function getUser (req, res, params) {
-  let username = params.username
-  await db.connect()
-  let user = await db.getUser(username)
-
-  delete user.email
-  delete user.password
-
-  send(res, 200, user)
+  send(res, 200, token)
 })
 
 export default async function main (req, res) {
